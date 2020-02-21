@@ -37,25 +37,30 @@ ffscraper = scraper.Scraper()
 x = 0
 
 while True:
+    print("Scraping Story Number:",x)
     c.execute('SELECT 1 FROM fanfiction WHERE id=? LIMIT 1', (x,))
     exists = c.fetchone()
-
-    if exists == "None":
+    if exists == None:
 
         metadata = ffscraper.scrape_story_text(x, keep_html=False)
 
-        fulltext = ''
-        for y in range(0, len(metadata['chapters'].keys())):
-            fulltext = fulltext + str(metadata['chapters'][x+1])
+        if metadata == None:
+            print("No story found at id",x)
+            c.execute('''INSERT INTO fanfiction (id, canon_type, canon, authorid, title, updated, published, language, genre, rating, chapters, words, reviews, favs, follows, status, story)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', (x, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None))
+            connection.commit()
+        else:
+            fulltext = ''
+            for y in range(0, len(metadata['chapters'].keys())):
+                fulltext = fulltext + str(metadata['chapters'][y+1])
 
-        fulltext = fulltext.replace("'",'"')
+            fulltext = fulltext.replace("'",'"')
 
-        c.execute('''INSERT INTO fanfiction (id, canon_type, canon, authorid, title, updated, published, language, genre, rating, chapters, words, reviews, favs, follows, status, story)
-                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', (metadata.get('id'), metadata.get('canon_type'), metadata.get('canon'), metadata.get('author_id'), metadata.get('title'), metadata.get('updated'), metadata.get('published'), metadata.get('lang'), " ".join(metadata.get('genres')), metadata.get('rated'), metadata.get('num_chapters'), metadata.get('num_words'), metadata.get('num_reviews'), metadata.get('num_favs'), metadata.get('num_follows'), metadata.get('status'), fulltext))
-        print('Gathered metadata for id:',int(metadata.get('id')))
+            c.execute('''INSERT INTO fanfiction (id, canon_type, canon, authorid, title, updated, published, language, genre, rating, chapters, words, reviews, favs, follows, status, story)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', (metadata.get('id'), metadata.get('canon_type'), metadata.get('canon'), metadata.get('author_id'), metadata.get('title'), metadata.get('updated'), metadata.get('published'), metadata.get('lang'), " ".join(metadata.get('genres')), metadata.get('rated'), metadata.get('num_chapters'), metadata.get('num_words'), metadata.get('num_reviews'), metadata.get('num_favs'), metadata.get('num_follows'), metadata.get('status'), fulltext))
+            print('Gathered metadata for id:',int(metadata.get('id')))
 
-        connection.commit()
-        time.sleep(.5)
+            connection.commit()
     
     else:
         print("Story with ID",x,"already exists in database, skipping.")
