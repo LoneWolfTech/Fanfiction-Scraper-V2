@@ -1,3 +1,2 @@
-https://www.microsoft.com/en-us/download/confirmation.aspx?id=54920
-Microsoft Access
 pyodbc
+fanfiction library (my branch has a fix for crashes on early stories) - https://github.com/lonewolf316/fanfiction
